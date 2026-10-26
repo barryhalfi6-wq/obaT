@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HALFi 17</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HALFi 17">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:'#3b82f6',card:'#1e293b'}}}}</script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f3f4f6}
+html.dark body{background:#0f172a}
+.hide{display:none!important}
+.wrap{overflow-wrap:anywhere;white-space:pre-wrap}
+.inp{padding:.75rem;border-radius:.75rem;border:1px solid #cbd5e1;background:#fff;min-width:0;width:100%;color:inherit}
+html.dark .inp{background:#0f172a;border-color:#475569}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;padding:.75rem}
+html.dark .card{background:#1e293b;border-color:#334155}
+.btn{background:#3b82f6;color:#fff;padding:.6rem 1rem;border-radius:.75rem;font-weight:600;font-size:.875rem}
+.btn:disabled{opacity:.5}
+.btn2{background:#e2e8f0;color:#0f172a;padding:.4rem .7rem;border-radius:.6rem;font-size:.8rem}
+html.dark .btn2{background:#334155;color:#f1f5f9}
+</style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 flex flex-col">
+
+<header class="bg-white dark:bg-card shadow-md p-3 flex justify-between items-center z-10">
+  <div class="flex items-center gap-2">
+    <div id="avatar-h" class="w-9 h-9 bg-brand rounded-full flex items-center justify-center text-white font-bold overflow-hidden bg-cover bg-center">H</div>
+    <h1 class="text-xl font-bold tracking-wider">HALFi <span class="text-brand">17</span></h1>
+  </div>
+  <button id="theme-toggle" class="text-xl" aria-label="Thème">🌙</button>
+</header>
+
+<main class="flex-1 overflow-y-auto p-4 pb-28">
+
+  <section id="view-dashboard" class="space-y-5">
+    <div class="bg-gradient-to-r from-brand to-blue-700 rounded-2xl p-5 text-white shadow-lg flex items-center gap-4">
+      <div class="relative">
+        <div id="avatar-big" class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-3xl font-bold overflow-hidden bg-cover bg-center">H</div>
+        <label class="absolute -bottom-1 -right-1 bg-white text-black rounded-full w-7 h-7 flex items-center justify-center text-sm cursor-pointer">📷
+          <input id="photo-in" type="file" accept="image/*" class="hide">
+        </label>
+      </div>
+      <div class="min-w-0 flex-1">
+        <h2 class="text-xl font-bold">Bonjour, <span id="uname">Étudiant</span>.</h2>
+        <p class="text-sm opacity-90">Prêt à réussir ta journée ?</p>
+        <button id="rename" class="text-xs underline opacity-80 mt-1">Changer mon nom</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 text-center">
+      <div class="card"><div id="st-files" class="text-2xl font-bold text-brand">0</div><div class="text-xs">Fichiers</div></div>
+      <div class="card"><div id="st-fiches" class="text-2xl font-bold text-brand">0</div><div class="text-xs">Fiches</div></div>
+      <div class="card"><div id="st-quiz" class="text-2xl font-bold text-brand">–</div><div class="text-xs">Dernier quiz</div></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="go('view-ai')" class="card flex flex-col items-center gap-1 py-4"><span class="text-3xl">🤖</span><span class="text-sm font-semibold">Assistant IA</span></button>
+      <button onclick="go('view-files')" class="card flex flex-col items-center gap-1 py-4"><span class="text-3xl">📁</span><span class="text-sm font-semibold">Mes fichiers</span></button>
+      <button onclick="go('view-revise')" class="card flex flex-col items-center gap-1 py-4"><span class="text-3xl">📖</span><span class="text-sm font-semibold">Révisions</span></button>
+      <button onclick="go('view-quiz')" class="card flex flex-col items-center gap-1 py-4"><span class="text-3xl">🎯</span><span class="text-sm font-semibold">Quiz</span></button>
+    </div>
+    <details class="card">
+      <summary class="text-sm font-semibold cursor-pointer">⚙️ Réglages IA</summary>
+      <p class="text-xs opacity-70 my-2">Pour utiliser l'assistant, les fiches et les quiz hors de Claude, ajoute ta clé OpenRouter. Elle reste uniquement dans ton navigateur.</p>
+      <input id="or-key" type="password" class="inp mb-2" placeholder="Clé OpenRouter (sk-or-...)">
+      <input id="or-model" class="inp mb-2" placeholder="Modèle">
+      <button id="or-save" class="btn2">Enregistrer</button>
+    </details>
+  </section>
+
+  <section id="view-ai" class="hide flex flex-col" style="min-height:100%">
+    <h2 class="text-lg font-bold mb-3">🤖 Assistant HALFi</h2>
+    <div id="chat-box" class="flex-1 card overflow-y-auto mb-3 min-h-[300px] space-y-3 wrap">
+      <div class="text-sm bg-blue-50 dark:bg-slate-700 p-3 rounded-lg w-4/5"><b>HALFi 17 :</b> Bonjour ! Posez-moi une question sur vos cours.</div>
+    </div>
+    <div class="flex gap-2"><input id="chat-input" class="inp" placeholder="Posez votre question..."><button id="send-btn" class="btn">➤</button></div>
+  </section>
+
+  <section id="view-files" class="hide">
+    <h2 class="text-lg font-bold mb-3">📁 Mes fichiers</h2>
+    <p class="text-xs opacity-70 mb-3">PDF, Word, images, etc. Ils sont gardés dans ce navigateur, sur cet appareil.</p>
+    <label class="btn inline-block cursor-pointer mb-4">➕ Ajouter des fichiers<input id="file-in" type="file" multiple class="hide"></label>
+    <div id="files-list" class="space-y-2"></div>
+  </section>
+
+  <section id="view-revise" class="hide">
+    <h2 class="text-lg font-bold mb-3">📖 Révisions</h2>
+    <div class="space-y-2 mb-3">
+      <input id="rv-topic" class="inp" placeholder="Matière ou sujet (ex. Le Romantisme)">
+      <select id="rv-type" class="inp">
+        <option>Fiche de révision</option><option>Résumé de cours</option><option>Cours complet structuré</option><option>Plan de révision sur 7 jours</option>
+      </select>
+      <button id="rv-go" class="btn w-full">✨ Générer</button>
+    </div>
+    <div id="rv-out" class="card wrap text-sm hide"></div>
+    <div id="rv-actions" class="flex gap-2 mt-2 hide"><button id="rv-save" class="btn2">💾 Enregistrer</button></div>
+    <h3 class="font-bold mt-5 mb-2">Mes fiches</h3>
+    <div id="fiches-list" class="space-y-2"></div>
+  </section>
+
+  <section id="view-quiz" class="hide">
+    <h2 class="text-lg font-bold mb-3">🎯 Quiz</h2>
+    <div id="qz-setup" class="space-y-2">
+      <input id="qz-topic" class="inp" placeholder="Sujet du quiz (ex. Histoire de France)">
+      <select id="qz-n" class="inp"><option value="5">5 questions</option><option value="10">10 questions</option><option value="15">15 questions</option></select>
+      <button id="qz-go" class="btn w-full">▶ Commencer</button>
+    </div>
+    <div id="qz-play" class="hide space-y-3"></div>
+  </section>
+
+  <section id="view-notes" class="hide">
+    <h2 class="text-lg font-bold mb-3">📒 Mes notes</h2>
+    <div class="flex gap-2 mb-3"><input id="note-input" class="inp" placeholder="Nouvelle note..."><button id="add-note-btn" class="btn">+</button></div>
+    <div id="notes-list" class="space-y-2"></div>
+  </section>
+</main>
+
+<nav class="bg-white dark:bg-card fixed bottom-0 w-full flex justify-around px-1 pt-2 shadow-lg z-10" style="padding-bottom:calc(.5rem + env(safe-area-inset-bottom,0px))">
+  <button onclick="go('view-dashboard')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">🏠</span><span class="text-[10px]">Accueil</span></button>
+  <button onclick="go('view-ai')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">🤖</span><span class="text-[10px]">IA</span></button>
+  <button onclick="go('view-files')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">📁</span><span class="text-[10px]">Fichiers</span></button>
+  <button onclick="go('view-revise')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">📖</span><span class="text-[10px]">Réviser</span></button>
+  <button onclick="go('view-quiz')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">🎯</span><span class="text-[10px]">Quiz</span></button>
+  <button onclick="go('view-notes')" class="flex flex-col items-center text-gray-500 flex-1"><span class="text-lg">📒</span><span class="text-[10px]">Notes</span></button>
+</nav>
+
+<script>
+const $=id=>document.getElementById(id);
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function go(id){document.querySelectorAll('main > section').forEach(s=>s.classList.add('hide'));$(id).classList.remove('hide');if(id==='view-files')renderFiles()}
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+$('theme-toggle').onclick=()=>{const d=document.documentElement.classList.toggle('dark');$('theme-toggle').textContent=d?'🌙':'☀️'};
+
+/* ---- Claude (sample) & downloads ---- */
+let cs=null,dl=null;
+if(window.claude&&claude.use){claude.use('sample').then(s=>cs=s);claude.use('downloads').then(d=>dl=d)}
+const orKey=()=>ls('halfi_orkey','');
+const orModel=()=>ls('halfi_ormodel','meta-llama/llama-3.3-70b-instruct:free');
+$('or-key').value=orKey();$('or-model').value=orModel();
+$('or-save').onclick=()=>{lsSet('halfi_orkey',$('or-key').value.trim());lsSet('halfi_ormodel',$('or-model').value.trim()||'meta-llama/llama-3.3-70b-instruct:free');alert('Réglages enregistrés.')};
+async function sample(input,opts){
+  if(cs)return cs(input,opts);
+  if(!orKey()){alert("Ajoute ta clé OpenRouter dans Accueil > Réglages IA.");throw new Error('no key')}
+  const messages=typeof input==='string'?[{role:'user',content:input}]:input;
+  const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+orKey(),'Content-Type':'application/json'},body:JSON.stringify({model:orModel(),messages})});
+  if(!r.ok)throw new Error('API '+r.status);
+  const j=await r.json();const text=j.choices[0].message.content;
+  if(opts&&opts.onText)opts.onText({text});
+  return {text};
+}
+sample.json=async(input,opts)=>{
+  if(cs)return cs.json(input,opts);
+  const r=await sample(input,opts);const m=r.text.match(/\[[\s\S]*\]/);
+  return JSON.parse(m?m[0]:r.text);
+};
+async function saveFile(filename,data){
+  if(dl){
+    try{await dl.save({filename,data})}catch(e){if(e&&e.code==='rejected_extension')alert("Ce type de fichier ne peut pas être téléchargé ici.");else if(e&&e.code!=='declined')alert('Téléchargement impossible.')}
+    return;
+  }
+  const b=data instanceof Blob?data:new Blob([data]);
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+const SYS="Tu es HALFi 17, un assistant universitaire intelligent, pédagogue et précis. Réponds en français, clairement.";
+
+/* ---- Profil ---- */
+$('uname').textContent=ls('halfi_name','Étudiant');
+$('rename').onclick=()=>{const n=prompt('Ton nom :',$('uname').textContent);if(n&&n.trim()){lsSet('halfi_name',n.trim());$('uname').textContent=n.trim()}};
+
+/* ---- IndexedDB ---- */
+let db=null;
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open('halfi17',1);
+  r.onupgradeneeded=()=>{r.result.createObjectStore('files',{keyPath:'id',autoIncrement:true});r.result.createObjectStore('kv')};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}})}
+function tx(store,mode,fn){return new Promise((res,rej)=>{if(!db)return rej();const t=db.transaction(store,mode);const r=fn(t.objectStore(store));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej()})}
+
+function setAvatar(blob){
+  const url=blob?'url('+URL.createObjectURL(blob)+')':'';
+  ['avatar-h','avatar-big'].forEach(i=>{const a=$(i);a.style.backgroundImage=url;a.textContent=blob?'':'H'});
+}
+$('photo-in').onchange=async e=>{const f=e.target.files[0];if(!f)return;setAvatar(f);try{await tx('kv','readwrite',s=>s.put(f,'photo'))}catch(x){}};
+
+/* ---- Fichiers ---- */
+function fmt(n){return n<1024?n+' o':n<1048576?(n/1024).toFixed(1)+' Ko':(n/1048576).toFixed(1)+' Mo'}
+async function renderFiles(){
+  const list=$('files-list');list.textContent='';
+  if(!db){list.append(el('p','text-sm text-red-500',"Le stockage de fichiers n'est pas disponible dans ce navigateur."));return}
+  const all=(await tx('files','readonly',s=>s.getAll()))||[];
+  $('st-files').textContent=all.length;
+  if(!all.length)list.append(el('p','text-sm opacity-70','Aucun fichier pour le moment.'));
+  all.reverse().forEach(f=>{
+    const row=el('div','card flex items-center gap-2');
+    const ic=/pdf/i.test(f.name)?'📕':/docx?$/i.test(f.name)?'📘':/^image/.test(f.type)?'🖼️':'📄';
+    row.append(el('span','text-2xl',ic));
+    const info=el('div','flex-1 min-w-0');info.append(el('div','text-sm font-semibold wrap',f.name),el('div','text-xs opacity-70',fmt(f.size)));
+    const d=el('button','btn2','⬇');d.onclick=()=>saveFile(f.name,f.blob);
+    const x=el('button','btn2','🗑️');x.onclick=async()=>{if(confirm('Supprimer ce fichier ?')){await tx('files','readwrite',s=>s.delete(f.id));renderFiles()}};
+    row.append(info,d,x);list.append(row);
+  });
+}
+$('file-in').onchange=async e=>{
+  for(const f of e.target.files){try{await tx('files','readwrite',s=>s.add({name:f.name,type:f.type,size:f.size,blob:f}))}catch(x){alert("Impossible d'enregistrer "+f.name)}}
+  e.target.value='';renderFiles();
+};
+
+/* ---- Chat ---- */
+const chatBox=$('chat-box');let hist=[];
+function bubble(cls,label,text){const d=el('div','text-sm p-3 rounded-lg w-4/5 '+cls);if(label)d.append(el('b',null,label+' '));const s=el('span',null,text);d.append(s);chatBox.append(d);chatBox.scrollTop=chatBox.scrollHeight;return s}
+async function send(){
+  const t=$('chat-input').value.trim();if(!t)return;
+  bubble('bg-brand text-white ml-auto','',t);$('chat-input').value='';hist.push({role:'user',content:t});
+  
+  const out=bubble('bg-blue-50 dark:bg-slate-700','HALFi 17 :','…');$('send-btn').disabled=true;
+  try{
+    const m=hist.map((x,i)=>i===0?{role:'user',content:SYS+'\n\n'+x.content}:x);
+    const r=await sample(m,{cache:false,onText:({text})=>{out.textContent=text;chatBox.scrollTop=chatBox.scrollHeight}});
+    out.textContent=r.text;hist.push({role:'assistant',content:r.text});
+  }catch(e){hist.pop();out.parentElement.className='text-sm bg-red-100 text-red-600 p-3 rounded-lg w-4/5';out.textContent="Erreur : impossible de joindre l'IA."}
+  $('send-btn').disabled=false;
+}
+$('send-btn').onclick=send;$('chat-input').onkeydown=e=>{if(e.key==='Enter')send()};
+
+/* ---- Révisions ---- */
+let fiches=ls('halfi_fiches',[]),cur=null;
+function renderFiches(){
+  $('st-fiches').textContent=fiches.length;
+  const l=$('fiches-list');l.textContent='';
+  if(!fiches.length)l.append(el('p','text-sm opacity-70','Aucune fiche enregistrée.'));
+  fiches.forEach((f,i)=>{
+    const c=el('div','card');const h=el('div','flex items-center gap-2');
+    const t=el('div','flex-1 min-w-0 text-sm font-semibold wrap',f.title);
+    const v=el('button','btn2','👁');const d=el('button','btn2','⬇');const x=el('button','btn2','🗑️');
+    const body=el('div','wrap text-sm mt-2 hide',f.text);
+    v.onclick=()=>body.classList.toggle('hide');
+    d.onclick=()=>saveFile(f.title.replace(/[^\w\u00C0-\u017F]+/g,'_').slice(0,50)+'.md',f.text);
+    x.onclick=()=>{fiches.splice(i,1);lsSet('halfi_fiches',fiches);renderFiches()};
+    h.append(t,v,d,x);c.append(h,body);l.append(c);
+  });
+}
+$('rv-go').onclick=async()=>{
+  const topic=$('rv-topic').value.trim();if(!topic)return;
+  
+  const type=$('rv-type').value,out=$('rv-out');
+  out.classList.remove('hide');out.textContent='…';$('rv-actions').classList.add('hide');$('rv-go').disabled=true;
+  try{
+    const r=await sample(SYS+`\n\nRédige : ${type} sur « ${topic} » pour un étudiant. Structure claire avec titres, points clés, définitions, exemples et quelques questions d'auto-évaluation à la fin.`,{cache:false,onText:({text})=>{out.textContent=text}});
+    out.textContent=r.text;cur={title:type+' – '+topic,text:r.text};$('rv-actions').classList.remove('hide');
+  }catch(e){out.textContent='Erreur : génération impossible.'}
+  $('rv-go').disabled=false;
+};
+$('rv-save').onclick=()=>{if(!cur)return;fiches.unshift(cur);lsSet('halfi_fiches',fiches);cur=null;$('rv-actions').classList.add('hide');renderFiches()};
+
+/* ---- Quiz ---- */
+$('st-quiz').textContent=ls('halfi_lastquiz','–');
+$('qz-go').onclick=async()=>{
+  const topic=$('qz-topic').value.trim(),n=$('qz-n').value;if(!topic)return;
+  
+  $('qz-go').disabled=true;$('qz-go').textContent='Création du quiz…';
+  try{
+    const qs=await sample.json(`Crée un quiz de ${n} questions à choix multiples (4 options) en français sur : « ${topic} », niveau universitaire. Réponds UNIQUEMENT par un tableau JSON : [{"q":"question","options":["a","b","c","d"],"answer":0,"explain":"courte explication"}] où "answer" est l'index (0 à 3) de la bonne option.`,{cache:false});
+    const valid=(Array.isArray(qs)?qs:[]).filter(q=>q&&q.q&&Array.isArray(q.options)&&q.options.length>=2&&Number.isInteger(q.answer)&&q.answer>=0&&q.answer<q.options.length);
+    if(!valid.length)throw 0;
+    playQuiz(valid);
+  }catch(e){alert('Impossible de créer le quiz. Réessaie.')}
+  $('qz-go').disabled=false;$('qz-go').textContent='▶ Commencer';
+};
+function playQuiz(qs){
+  let i=0,score=0;const box=$('qz-play');$('qz-setup').classList.add('hide');box.classList.remove('hide');
+  function show(){
+    box.textContent='';
+    if(i>=qs.length){
+      const p=Math.round(score/qs.length*100);lsSet('halfi_lastquiz',score+'/'+qs.length);$('st-quiz').textContent=score+'/'+qs.length;
+      const c=el('div','card text-center space-y-2');c.append(el('div','text-4xl',p>=70?'🏆':p>=40?'👍':'💪'),el('div','text-xl font-bold','Score : '+score+'/'+qs.length+' ('+p+'%)'));
+      const b=el('button','btn','Nouveau quiz');b.onclick=()=>{box.classList.add('hide');$('qz-setup').classList.remove('hide')};c.append(b);box.append(c);return;
+    }
+    const q=qs[i];box.append(el('div','text-xs opacity-70','Question '+(i+1)+'/'+qs.length+' • Score '+score));
+    box.append(el('div','card font-semibold wrap',q.q));
+    const opts=el('div','space-y-2');let done=false;
+    q.options.forEach((o,k)=>{
+      const b=el('button','card w-full text-left text-sm wrap',o);
+      b.onclick=()=>{
+        if(done)return;done=true;if(k===q.answer)score++;
+        [...opts.children].forEach((x,j)=>{if(j===q.answer)x.style.borderColor='#22c55e';else if(j===k)x.style.borderColor='#ef4444';x.style.borderWidth='2px'});
+        if(q.explain)box.append(el('div','text-sm card wrap','💡 '+q.explain));
+        const nx=el('button','btn w-full',i+1<qs.length?'Suivant ➜':'Voir le score');nx.onclick=()=>{i++;show()};box.append(nx);
+      };opts.append(b);
+    });box.append(opts);
+  }
+  show();
+}
+
+/* ---- Notes ---- */
+let notes=ls('halfi_notes',[]);
+function renderNotes(){
+  const l=$('notes-list');l.textContent='';
+  notes.forEach((n,i)=>{const r=el('div','card flex justify-between items-center gap-2');r.append(el('p','text-sm wrap',n));
+    const b=el('button',null,'🗑️');b.onclick=()=>{notes.splice(i,1);lsSet('halfi_notes',notes);renderNotes()};r.append(b);l.append(r)});
+}
+$('add-note-btn').onclick=()=>{const v=$('note-input').value.trim();if(v){notes.push(v);lsSet('halfi_notes',notes);$('note-input').value='';renderNotes()}};
+
+/* ---- Init ---- */
+renderNotes();renderFiches();
+openDB().then(async d=>{db=d;if(!db)return;
+  try{const p=await tx('kv','readonly',s=>s.get('photo'));if(p)setAvatar(p);else if(!window.claude){['avatar-h','avatar-big'].forEach(i=>{$(i).style.backgroundImage='url(icons/icon-192.png)';$(i).textContent=''})}const all=await tx('files','readonly',s=>s.count());$('st-files').textContent=all||0}catch(e){}});
+if('serviceWorker' in navigator&&!window.claude&&location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
